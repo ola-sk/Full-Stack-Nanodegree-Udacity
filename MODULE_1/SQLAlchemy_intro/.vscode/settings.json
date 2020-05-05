@@ -1,0 +1,8 @@
+{
+  "python.linting.pylintArgs": [
+    "--load-plugins",
+    "pylint-flask",
+    "pylint-flask-sqlalchemy",
+  ],
+  "python.pythonPath": "/home/ola/anaconda3/envs/full-stack-nano/bin/python"
+}
