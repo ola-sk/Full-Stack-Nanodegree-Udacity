@@ -73,6 +73,29 @@ class Todo(db.Model):
 # —————————————————————————————————————————————————————————————————————————————
 # HANDLE ROUTES
 # —————————————————————————————————————————————————————————————————————————————
+@app.route('/todos/set-completed', methods=['POST'])
+def set_completed_todo():
+  error = False
+  body = {}
+  try:
+    updateId = request.get_json()['id']
+    isCompleted = request.get_json()['completed']
+    todo = Todo.query.get(updateId)
+    todo.completed = isCompleted
+    db.session.commit()
+    body['id'] = updateId
+    body['completed'] = todo.completed
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    abort (400)
+  else:
+    return jsonify(body)
+
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
   error = False
@@ -82,7 +105,9 @@ def create_todo():
     todo = Todo(description=description)
     db.session.add(todo)
     db.session.commit()
-    body['description'] = todo.description
+    body['id'] = todo.id
+    body['completed'] = todo.completed
+    body['decription'] = todo.description
   except:
     error = True
     db.session.rollback()
