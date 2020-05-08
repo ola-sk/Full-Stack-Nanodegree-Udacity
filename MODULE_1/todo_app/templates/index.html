@@ -43,7 +43,7 @@
           const newCompleted = e.target.checked;
           const todoId = e.target.dataset["id"];
           fetch("/todos/set-completed", {
-            method: "POST",
+            method: "PUT",
             body: JSON.stringify({
               id: todoId,
               completed: newCompleted,
@@ -76,7 +76,7 @@
         cross.onclick = (e) => {
           const todoId = e.target.dataset["id"];
           fetch("/todos/delete", {
-            method: "POST",
+            method: "DELETE",
             body: JSON.stringify({
               id: todoId,
             }),

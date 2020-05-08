@@ -73,7 +73,7 @@ class Todo(db.Model):
 # —————————————————————————————————————————————————————————————————————————————
 # HANDLE ROUTES
 # —————————————————————————————————————————————————————————————————————————————
-@app.route('/todos/delete',methods=['POST'])
+@app.route('/todos/delete',methods=['DELETE'])
 def delete_todo():
   error = False
   body = {}
@@ -94,7 +94,7 @@ def delete_todo():
   else:
     return jsonify(body)
 
-@app.route('/todos/set-completed', methods=['POST'])
+@app.route('/todos/set-completed', methods=['PUT'])
 def set_completed_todo():
   error = False
   body = {}
