@@ -121,7 +121,7 @@ def create_todo():
 
 @app.route('/')
 def index():
-  return render_template('index.html', data=Todo.query.all())
+  return render_template('index.html', data=Todo.query.order_by('completed').order_by('id').all())
 
 # —————————————————————————————————————————————————————————————————————————————
 # FOR OPTIONAL RUNNING THE APP WITH `PYTHON` COMMAND
