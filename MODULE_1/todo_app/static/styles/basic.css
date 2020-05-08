@@ -13,4 +13,24 @@ ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 250px;;
+}
+
+li {
+  clear: both;
+  border-bottom: 1px solid rgba(1, 0, 0, 0.04);
+  padding: 2.5px;
+}
+
+li button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  outline: none;
+  color: rgb(238, 73, 58);
+  background-color: rgba(0, 0, 0, 0);
+  float: right;
+  cursor: pointer;
+  font-size: 20px;
 }

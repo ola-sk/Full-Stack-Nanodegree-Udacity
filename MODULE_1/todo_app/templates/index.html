@@ -20,7 +20,6 @@
           data-id="{{ d.id }}"
           id="check-{{ d.id }}"
           type="checkbox"
-          name="task_done_indicator"
           autocomplete="off"
           {%
           if
@@ -30,121 +29,19 @@
           {%
           endif
           %}
-        /><label for="check-{{ d.id }}">{{ d.description }}</label>
+        /><label for="check-{{ d.id }}">{{ d.description }}</label><button class="cross-button" id="cross-{{ d.id }}" data-id="{{ d.id }}">&cross;</button>
       </li>
       {% endfor %}
     </ul>
 
     <script>
       //———————————————————————————————————————————————————————————————
-      // HANDLE NEW ITEMS CREATION
+      // UTILITIES
       //———————————————————————————————————————————————————————————————
-      const descInput = document.getElementById("description");
-      document.getElementById("form").onsubmit = (e) => {
-        e.preventDefault();
-        const desc = descInput.value;
-        descInput.value = "";
-        fetch("/todos/create", {
-          method: "POST",
-          body: JSON.stringify({
-            description: desc,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .then((response) => response.json())
-          .then((jsonResponse) => {
-            // use the response from the server to populate newly created lis
-            let li = document.createElement("li");
-            let newcheckbox = document.createElement("input");
-            newcheckbox.setAttribute("class", "checkbox-change");
-            newcheckbox.setAttribute("id", "check" + jsonResponse.id);
-            newcheckbox.setAttribute("data-id", jsonResponse.id);
-            newcheckbox.setAttribute("type", "checkbox");
-            newcheckbox.setAttribute("name", "task_done_indicator");
-            newcheckbox.setAttribute("autocomplete", "off");
-            newcheckbox.checked = jsonResponse.completed;
-            let newlabel = document.createElement("label");
-            newlabel.setAttribute("for", "check" + jsonResponse.id);
-            newlabel.innerText = desc;
-
-            newcheckbox.onchange = (e) => {
-              const newCompleted = e.target.checked;
-              const todoId = e.target.dataset["id"];
-              const printCompletedState = (todoId, newCompleted) => {
-                try {
-                  if (newCompleted === true) {
-                    console.log("Task " + todoId + " got completed");
-                  } else if (newCompleted === false) {
-                    console.log("Task " + todoId + " is not yet completed");
-                  }
-                } catch (exception) {
-                  console.log("Ooooooops, some error occured!\n", exception);
-                }
-              };
-              printCompletedState(todoId, newCompleted);
-              fetch("/todos/set-completed", {
-                method: "POST",
-                body: JSON.stringify({
-                  id: todoId,
-                  completed: newCompleted,
-                }),
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              })
-                .then((response) => response.json())
-                .then((jsonResponse) => {
-                  if (jsonResponse.completed) {
-                    console.log(
-                      "Server noted: task " + jsonResponse.id + " completed."
-                    );
-                  } else {
-                    console.log(
-                      "Server noted: task " + jsonResponse.id + " uncompleted."
-                    );
-                  }
-                })
-                .catch((exception) => {
-                  //TODO implement sending error logs to the server.
-                  console.log(exception);
-                  document.getElementById("error").className = "";
-                });
-            };
-
-            li.appendChild(newcheckbox);
-            li.appendChild(newlabel);
-            document.getElementById("todos").prepend(li);
-
-            document.getElementById("error").className = "hidden";
-          })
-          .catch((exception) => {
-            //TODO implement sending error logs to the server.
-            console.log(exception);
-            document.getElementById("error").className = "";
-          });
-      };
-      //———————————————————————————————————————————————————————————————
-      // HANDLE TODO ITEMS RENDERED ON PAGE LOAD (ADD UPDATING 'COMPLETED' STATE OF A TODO)
-      //———————————————————————————————————————————————————————————————
-      const checkboxes = document.querySelectorAll(".checkbox-change");
-      checkboxes.forEach((checkbox) => {
+      const attachUpdateCompletedEvent = (checkbox) => {
         checkbox.onchange = (e) => {
           const newCompleted = e.target.checked;
           const todoId = e.target.dataset["id"];
-          const printCompletedState = (todoId, newCompleted) => {
-            try {
-              if (newCompleted === true) {
-                console.log("Task " + todoId + " got completed");
-              } else if (newCompleted === false) {
-                console.log("Task " + todoId + " is not yet completed");
-              }
-            } catch (exception) {
-              console.log("Ooooooops, some error occured!\n", exception);
-            }
-          };
-          printCompletedState(todoId, newCompleted);
           fetch("/todos/set-completed", {
             method: "POST",
             body: JSON.stringify({
@@ -171,9 +68,107 @@
               //TODO implement sending error logs to the server.
               console.log(exception);
               document.getElementById("error").className = "";
-            });
-        };
-      });
+            })
+        }
+      }
+
+      const attachDeleteTodoEvent = (cross) => {
+        cross.onclick = (e) => {
+          const todoId = e.target.dataset["id"];
+          fetch("/todos/delete", {
+            method: "POST",
+            body: JSON.stringify({
+              id: todoId,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+          .then((response) => response.json())
+          .then((jsonResponse) => {
+            e.target.parentElement.remove();
+            console.log("Task " + jsonResponse.id + " got deleted from the server.");
+          })
+          .catch((exception) => {
+              //TODO implement sending error logs to the server.
+              console.log(exception);
+              document.getElementById("error").className = "";
+          })
+        }
+      }
+
+      //———————————————————————————————————————————————————————————————
+      // HANDLE NEW TODO ITEMS CREATION
+      //———————————————————————————————————————————————————————————————
+      const descInput = document.getElementById("description");
+      document.getElementById("form").onsubmit = (e) => {
+        e.preventDefault();
+        const desc = descInput.value;
+        descInput.value = "";
+        fetch("/todos/create", {
+          method: "POST",
+          body: JSON.stringify({
+            description: desc,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((jsonResponse) => {
+            // use the response from the server to populate newly created lis
+            const li = document.createElement("li");
+            const newcheckbox = document.createElement("input");
+            newcheckbox.setAttribute("class", "checkbox-change");
+            newcheckbox.setAttribute("id", "check" + jsonResponse.id);
+            newcheckbox.setAttribute("data-id", jsonResponse.id);
+            newcheckbox.setAttribute("type", "checkbox");
+            newcheckbox.setAttribute("autocomplete", "off");
+            newcheckbox.checked = jsonResponse.completed;
+            const newlabel = document.createElement("label");
+            newlabel.setAttribute("for", "check" + jsonResponse.id);
+            newlabel.innerText = desc;
+            const cross = document.createElement("button");
+            cross.setAttribute("class", "cross-button");
+            cross.setAttribute("id", "cross" + jsonResponse.id);
+            cross.setAttribute("data-id", jsonResponse.id);
+            cross.innerHTML = "&cross;";
+            //———————————————————————————————————————————————————————————————
+            // ATTACH 'DELETE TODO' EVENT HANDLER
+            //———————————————————————————————————————————————————————————————
+            attachDeleteTodoEvent(cross);
+            //———————————————————————————————————————————————————————————————
+            // ATTACH 'UPDATE COMPLETED STATE OF A TODO' EVENT HANDLER
+            //———————————————————————————————————————————————————————————————
+            attachUpdateCompletedEvent(newcheckbox);
+            
+            li.appendChild(newcheckbox);
+            li.appendChild(newlabel);
+            li.appendChild(cross);
+            document.getElementById("todos").prepend(li);
+
+            document.getElementById("error").className = "hidden";
+          })
+          .catch((exception) => {
+            //TODO implement sending error logs to the server.
+            console.log(exception);
+            document.getElementById("error").className = "";
+          });
+      }
+
+      //———————————————————————————————————————————————————————————————
+      // ATTACH 'UPDATE COMPLETED STATE OF A TODO' EVENT HANDLER 
+      // TO EACH TODO ITEM RENDERED ON A PAGE LOAD
+      //———————————————————————————————————————————————————————————————
+      const checkboxes = document.querySelectorAll(".checkbox-change");
+      checkboxes.forEach(checkbox => attachUpdateCompletedEvent(checkbox));
+      //———————————————————————————————————————————————————————————————
+      // ATTACH 'DELETE TODO' EVENT HANDLER 
+      // TO EACH TODO ITEM RENDERED ON A PAGE LOAD
+      //———————————————————————————————————————————————————————————————
+      const crosses = document.querySelectorAll(".cross-button");
+      crosses.forEach(cross => attachDeleteTodoEvent(cross));
+      
     </script>
   </body>
 </html>

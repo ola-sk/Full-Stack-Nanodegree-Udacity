@@ -73,6 +73,27 @@ class Todo(db.Model):
 # —————————————————————————————————————————————————————————————————————————————
 # HANDLE ROUTES
 # —————————————————————————————————————————————————————————————————————————————
+@app.route('/todos/delete',methods=['POST'])
+def delete_todo():
+  error = False
+  body = {}
+  try:
+    todo_id = request.get_json()['id']
+    todo = Todo.query.get(todo_id) 
+    db.session.delete(todo)
+    db.session.commit()
+    body['id'] = todo.id
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if error:
+    abort (400)
+  else:
+    return jsonify(body)
+
 @app.route('/todos/set-completed', methods=['POST'])
 def set_completed_todo():
   error = False
@@ -121,7 +142,7 @@ def create_todo():
 
 @app.route('/')
 def index():
-  return render_template('index.html', data=Todo.query.order_by('completed').order_by('id').all())
+  return render_template('index.html', data=Todo.query.order_by('completed').order_by(Todo.id.desc()).all())
 
 # —————————————————————————————————————————————————————————————————————————————
 # FOR OPTIONAL RUNNING THE APP WITH `PYTHON` COMMAND
