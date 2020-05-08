@@ -1,5 +1,5 @@
-# Created by https://www.gitignore.io/api/code,flask,python,visualstudiocode
-# Edit at https://www.gitignore.io/?templates=code,flask,python,visualstudiocode
+# Created by https://www.gitignore.io/api/code,linux,flask,python,visualstudiocode
+# Edit at https://www.gitignore.io/?templates=code,linux,flask,python,visualstudiocode
 
 ### Code ###
 .vscode/*
@@ -118,6 +118,21 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 
@@ -171,4 +186,4 @@ dmypy.json
 # Ignore all local history of files
 .history
 
-# End of https://www.gitignore.io/api/code,flask,python,visualstudiocode
+# End of https://www.gitignore.io/api/code,linux,flask,python,visualstudiocode
