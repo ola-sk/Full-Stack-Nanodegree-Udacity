@@ -1,0 +1,15 @@
+name: full-stack-nano
+channels:
+  - r
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - sqlalchemy
+  - python
+  - flask-sqlalchemy
+  - flask
+  - psycopg2
+  - pylint
+  - pylint-flask
+  - flask-migrate
