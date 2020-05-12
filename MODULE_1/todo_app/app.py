@@ -67,9 +67,25 @@ class Todo(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   description = db.Column(db.String(), nullable=False)
   completed = db.Column(db.Boolean, nullable=False, default=False)
+
+  # we should name the foreign key if we want to be able to downgrade the revision of migration. Otherwise it errors out with sqlalchemy.exc.CompileError that it cannot drop the foreign key constraint since the constraint has no name.
+
+  # `server_default` vs `default` in SQLAlchemy:
+  # SQLAlchemy uses two different options on Models' Columns to make INSERTions to have default values specified:
+  # `default` works on application server's side. It renders the default expression in the INSERT or UPDATE statements and sends them to the database server. This option doesn't specify anything on the database side.
+  # `server_default` works on database server's side. SQLAlchemy places the places the expression in the CREATE TABLE statement to put a default value there. Even if application server's side does not provide any value during an INSERT or UPDATE request, the database server puts the default there on its own.
+  # read more: https://stackoverflow.com/questions/52431208/sqlalchemy-default-vs-server-default-performance
+
+  list_id = db.Column(db.Integer(), db.ForeignKey('todolists.id', name='todolists_ref'), nullable=False, server_default='1')
   def __repr__(self):
     return f'<Todo {self.id} {self.description}>'
 
+class Todolist(db.Model):
+  __tablename__ = 'todolists'
+  id = db.Column(db.Integer(), primary_key=True)
+  name = db.Column(db.String(), nullable=False)
+  # db.relationship('ModelClassName', backref='this_is_how_the_chid_references_its_parent')
+  todos = db.relationship('Todo', backref='list', lazy=True)
 # —————————————————————————————————————————————————————————————————————————————
 # HANDLE ROUTES
 # —————————————————————————————————————————————————————————————————————————————
