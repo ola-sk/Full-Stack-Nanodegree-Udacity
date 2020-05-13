@@ -78,14 +78,16 @@ class Todo(db.Model):
 
   list_id = db.Column(db.Integer(), db.ForeignKey('todolists.id', name='todolists_ref'), nullable=False, server_default='1')
   def __repr__(self):
-    return f'<Todo {self.id} {self.description}>'
+    return f'<Todo {self.id} {self.description} in list {TodoList.query.filter_by(id=self.list_id).first()}>'
 
-class Todolist(db.Model):
+class TodoList(db.Model):
   __tablename__ = 'todolists'
   id = db.Column(db.Integer(), primary_key=True)
   name = db.Column(db.String(), nullable=False)
   # db.relationship('ModelClassName', backref='this_is_how_the_chid_references_its_parent')
   todos = db.relationship('Todo', backref='list', lazy=True)
+  def __repr__(self):
+    return f'{self.id}: {self.name}'
 # —————————————————————————————————————————————————————————————————————————————
 # HANDLE ROUTES
 # —————————————————————————————————————————————————————————————————————————————
@@ -156,10 +158,13 @@ def create_todo():
   else:
     return jsonify(body)
 
+@app.route('/lists/<list_id>')
+def get_list_todos(list_id):
+  return render_template('index.html', data=Todo.query.filter_by(list_id=list_id).order_by('completed').order_by(Todo.id.desc()).all())
+
 @app.route('/')
 def index():
-  return render_template('index.html', data=Todo.query.order_by('completed').order_by(Todo.id.desc()).all())
-
+  return redirect(url_for('get_list_todos', list_id=1))
 # —————————————————————————————————————————————————————————————————————————————
 # FOR OPTIONAL RUNNING THE APP WITH `PYTHON` COMMAND
 # —————————————————————————————————————————————————————————————————————————————
