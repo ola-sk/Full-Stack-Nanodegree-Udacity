@@ -1,38 +1,57 @@
 <html>
   <head>
     <title>Todo App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/basic.css') }}"/>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='./styles/basic.css') }}"
+    />
   </head>
 
   <body>
-    <div id="error" class="hidden">Something went wrong!</div>
+    <div class="lists-wrapper">
+      <ul id="lists">
+        {% for list in lists %}
+        <li><a href="/lists/{{ list.id }}">{{ list.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
 
-    <form id="form" method="post" action="/todos/create">
-      <input type="text" id="description" name="description" />
-      <input type="submit" value="Create" />
-    </form>
-
-    <ul id="todos">
-      {% for d in data %}
-      <li>
-        <input
-          class="checkbox-change"
-          data-id="{{ d.id }}"
-          id="check-{{ d.id }}"
-          type="checkbox"
-          autocomplete="off"
-          {%
-          if
-          d.completed
-          %}
-          checked
-          {%
-          endif
-          %}
-        /><label for="check-{{ d.id }}">{{ d.description }}</label><button class="cross-button" id="cross-{{ d.id }}" data-id="{{ d.id }}">&cross;</button>
-      </li>
-      {% endfor %}
-    </ul>
+    <div class="todos-wrapper">
+      <h4>{{ active_list.name }}</h4>
+      <form id="form" method="post" action="/todos/create">
+        <input type="text" id="description" name="description" />
+        <input type="submit" value="Create" class="submit-button" />
+      </form>
+      <div id="error" class="hidden">Something went wrong!</div>
+      <ul id="todos">
+        {% for todo in todos %}
+        <li>
+          <input
+            class="checkbox-change"
+            data-id="{{todo.id }}"
+            id="check-{{todo.id }}"
+            type="checkbox"
+            autocomplete="off"
+            {%
+            if
+            todo.completed
+            %}
+            checked
+            {%
+            endif
+            %}
+          /><label for="check-{{todo.id }}">{{todo.description }}</label
+          ><button
+            class="cross-button"
+            id="cross-{{todo.id }}"
+            data-id="{{todo.id }}"
+          >
+            &cross;
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
 
     <script>
       //———————————————————————————————————————————————————————————————
@@ -68,9 +87,9 @@
               //TODO implement sending error logs to the server.
               console.log(exception);
               document.getElementById("error").className = "";
-            })
-        }
-      }
+            });
+        };
+      };
 
       const attachDeleteTodoEvent = (cross) => {
         cross.onclick = (e) => {
@@ -84,18 +103,20 @@
               "Content-Type": "application/json",
             },
           })
-          .then((response) => response.json())
-          .then((jsonResponse) => {
-            e.target.parentElement.remove();
-            console.log("Task " + jsonResponse.id + " got deleted from the server.");
-          })
-          .catch((exception) => {
+            .then((response) => response.json())
+            .then((jsonResponse) => {
+              e.target.parentElement.remove();
+              console.log(
+                "Task " + jsonResponse.id + " got deleted from the server."
+              );
+            })
+            .catch((exception) => {
               //TODO implement sending error logs to the server.
               console.log(exception);
               document.getElementById("error").className = "";
-          })
-        }
-      }
+            });
+        };
+      };
 
       //———————————————————————————————————————————————————————————————
       // HANDLE NEW TODO ITEMS CREATION
@@ -141,7 +162,7 @@
             // ATTACH 'UPDATE COMPLETED STATE OF A TODO' EVENT HANDLER
             //———————————————————————————————————————————————————————————————
             attachUpdateCompletedEvent(newcheckbox);
-            
+
             li.appendChild(newcheckbox);
             li.appendChild(newlabel);
             li.appendChild(cross);
@@ -154,21 +175,20 @@
             console.log(exception);
             document.getElementById("error").className = "";
           });
-      }
+      };
 
       //———————————————————————————————————————————————————————————————
-      // ATTACH 'UPDATE COMPLETED STATE OF A TODO' EVENT HANDLER 
+      // ATTACH 'UPDATE COMPLETED STATE OF A TODO' EVENT HANDLER
       // TO EACH TODO ITEM RENDERED ON A PAGE LOAD
       //———————————————————————————————————————————————————————————————
       const checkboxes = document.querySelectorAll(".checkbox-change");
-      checkboxes.forEach(checkbox => attachUpdateCompletedEvent(checkbox));
+      checkboxes.forEach((checkbox) => attachUpdateCompletedEvent(checkbox));
       //———————————————————————————————————————————————————————————————
-      // ATTACH 'DELETE TODO' EVENT HANDLER 
+      // ATTACH 'DELETE TODO' EVENT HANDLER
       // TO EACH TODO ITEM RENDERED ON A PAGE LOAD
       //———————————————————————————————————————————————————————————————
       const crosses = document.querySelectorAll(".cross-button");
-      crosses.forEach(cross => attachDeleteTodoEvent(cross));
-      
+      crosses.forEach((cross) => attachDeleteTodoEvent(cross));
     </script>
   </body>
 </html>
